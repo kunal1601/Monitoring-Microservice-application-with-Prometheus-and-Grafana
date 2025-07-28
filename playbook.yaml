@@ -1,0 +1,58 @@
+- name: Deploy monitoring stack with Docker using Ansible
+  hosts: local
+  tasks:
+
+    - name: Build Prometheus image
+      command: docker build -t prometheus-custom -f Dockerfile.prometheus .
+      args:
+        chdir: /root/Monitoring-Microservice-application-with-Prometheus-and-Grafana/dockerfiles
+
+    - name: Build Grafana image
+      command: docker build -t grafana-custom -f Dockerfile.Grafana .
+      args:
+        chdir: /root/Monitoring-Microservice-application-with-Prometheus-and-Grafana/dockerfiles
+
+    - name: Build Node Exporter image
+      command: docker build -t node-exporter-custom -f Dockerfile.node_exporter .
+      args:
+        chdir: /root/Monitoring-Microservice-application-with-Prometheus-and-Grafana/dockerfiles
+
+    - name: Build Microservice image
+      command: docker build -t microservice-custom -f Dockerfile.microservice . 
+      args:
+        chdir: /root/Monitoring-Microservice-application-with-Prometheus-and-Grafana/dockerfiles
+
+    - name: Run Prometheus container
+      docker_container:
+        name: prometheus
+        image: prometheus-custom
+        state: started
+        ports:
+          - "9090:9090"
+        volumes:
+          - /root/Monitoring-Microservice-application-with-Prometheus-and-Grafana/dockerfiles/prometheus.yaml:/prometheus/prometheus.yaml
+
+    - name: Run Grafana container
+      docker_container:
+        name: grafana
+        image: grafana-custom
+        state: started
+        ports:
+          - "3000:3000"
+  
+    - name: Run Node Exporter container
+      docker_container:
+        name: node_exporter
+        image: node-exporter-custom
+        state: started
+        ports:
+          - "9100:9100"
+
+    - name: Run Microservice container
+      docker_container:
+        name: microservice
+        image: microservice-custom
+        state: started
+        ports:
+          - "5000:5000"
+

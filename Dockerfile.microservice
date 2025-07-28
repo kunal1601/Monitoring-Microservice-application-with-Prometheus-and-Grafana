@@ -1,0 +1,5 @@
+FROM python:3.9-slim
+COPY flask-app.py flask-app.py
+RUN pip install flask prometheus-client
+EXPOSE 5000
+CMD ["python", "flask-app.py"]
